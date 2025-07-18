@@ -5,9 +5,9 @@
               <img class="logo mr10" src="../../assets/img/logo.png" alt="" />
               <div class="login-title">Vertex-admin</div>
           </div>
-          <el-form :model="param" :rules="rules" ref="login" size="large">
+          <el-form :model="params" :rules="rules" ref="login" size="large">
               <el-form-item prop="username">
-                  <el-input v-model="param.username" placeholder="用户名">
+                  <el-input v-model="params.username" placeholder="用户名">
                       <template #prepend>
                           <el-icon>
                               <User />
@@ -19,7 +19,7 @@
                   <el-input
                       type="password"
                       placeholder="密码"
-                      v-model="param.password"
+                      v-model="params.password"
                       @keyup.enter="submitForm(login)"
                   >
                       <template #prepend>
@@ -30,10 +30,10 @@
                   </el-input>
               </el-form-item>
               <div class="pwd-tips">
-                  <el-checkbox class="pwd-checkbox" v-model="checked" label="记住密码" />
-                  <el-link type="primary" @click="$router.push('/reset-pwd')">忘记密码</el-link>
+                  <!-- <el-checkbox class="pwd-checkbox" v-model="checked" label="记住密码" />
+                  <el-link type="primary" @click="$router.push('/reset-pwd')">忘记密码</el-link> -->
               </div>
-              <el-button class="login-btn" type="primary" size="large" @click="submitForm(login)">登录</el-button>
+              <el-button class="login-btn" type="primary" size="large" @click="submitForm(login)" :loading="loading">登录</el-button>
               <p class="login-tips">Tips : 用户名和密码随便填。</p>
               <p class="login-text">
                   没有账号？<el-link type="primary" @click="$router.push('/register')">立即注册</el-link>
@@ -50,22 +50,24 @@ import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
+import useLoading from '@/hooks/loading'
+import {useUserStore} from '@/store'
 
 interface LoginInfo {
   username: string;
   password: string;
 }
 
-const lgStr = localStorage.getItem('login-param');
-const defParam = lgStr ? JSON.parse(lgStr) : null;
-const checked = ref(lgStr ? true : false);
-
+const {loading,setLoading}=useLoading()
 const router = useRouter();
-const param = reactive<LoginInfo>({
-  username: defParam ? defParam.username : '',
-  password: defParam ? defParam.password : '',
-});
+const userStore=useUserStore()
 
+
+const params = reactive<LoginInfo>({
+  username:'admin',
+  password:'admin',
+});
+const login = ref<FormInstance>()
 const rules: FormRules = {
   username: [
       {
@@ -78,26 +80,22 @@ const rules: FormRules = {
 };
 // const permiss = usePermissStore();
 // const login = ref<FormInstance>();
-const submitForm = (formEl: FormInstance | undefined) => {
+const submitForm = async (formEl: FormInstance | undefined) => {
+  // 防止重复点击
+  if(loading.value)return
   if (!formEl) return;
-  // formEl.validate((valid: boolean) => {
-  //     if (valid) {
-  //         ElMessage.success('登录成功');
-  //         localStorage.setItem('ms_username', param.username);
-  //         const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
-  //         permiss.handleSet(keys);
-  //         localStorage.setItem('ms_keys', JSON.stringify(keys));
-  //         router.push('/');
-  //         if (checked.value) {
-  //             localStorage.setItem('login-param', JSON.stringify(param));
-  //         } else {
-  //             localStorage.removeItem('login-param');
-  //         }
-  //     } else {
-  //         ElMessage.error('登录失败');
-  //         return false;
-  //     }
-  // });
+  await formEl.validate(async valid=>{
+    if(valid){
+      setLoading(true)
+      try{
+        await userStore.login(params)
+      }catch(err){
+        console.log('err',err)
+      }finally{
+        setLoading(false)
+      }
+    }
+  })
 };
 
 // const tabs = useTabsStore();
