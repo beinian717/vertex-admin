@@ -1,45 +1,48 @@
 <template>
   <div class="login-bg">
-      <div class="login-container">
-          <div class="login-header">
-              <img class="logo mr10" src="../../assets/img/logo.png" alt="" />
-              <div class="login-title">Vertex-admin</div>
-          </div>
-          <el-form :model="params" :rules="rules" ref="login" size="large">
-              <el-form-item prop="username">
-                  <el-input v-model="params.username" placeholder="用户名">
-                      <template #prepend>
-                          <el-icon>
-                              <User />
-                          </el-icon>
-                      </template>
-                  </el-input>
-              </el-form-item>
-              <el-form-item prop="password">
-                  <el-input
-                      type="password"
-                      placeholder="密码"
-                      v-model="params.password"
-                      @keyup.enter="submitForm(login)"
-                  >
-                      <template #prepend>
-                          <el-icon>
-                              <Lock />
-                          </el-icon>
-                      </template>
-                  </el-input>
-              </el-form-item>
-              <div class="pwd-tips">
-                  <!-- <el-checkbox class="pwd-checkbox" v-model="checked" label="记住密码" />
-                  <el-link type="primary" @click="$router.push('/reset-pwd')">忘记密码</el-link> -->
-              </div>
-              <el-button class="login-btn" type="primary" size="large" @click="submitForm(login)" :loading="loading">登录</el-button>
-              <p class="login-tips">Tips : 用户名和密码随便填。</p>
-              <p class="login-text">
-                  没有账号？<el-link type="primary" @click="$router.push('/register')">立即注册</el-link>
-              </p>
-          </el-form>
+    <div class="login-container">
+      <div class="login-header">
+        <img class="logo mr10" src="../../assets/img/logo.png" alt="" />
+        <div class="login-title">Vertex-admin</div>
       </div>
+      <el-form :model="params" :rules="rules" ref="login" size="large">
+        <el-form-item prop="username">
+          <el-input v-model="params.username" placeholder="用户名">
+            <template #prepend>
+              <el-icon>
+                <User />
+              </el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item prop="password">
+          <el-input type="password" placeholder="密码" v-model="params.password" @keyup.enter="submitForm(login)">
+            <template #prepend>
+              <el-icon>
+                <Lock />
+              </el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <div class="pwd-tips">
+          <!-- <el-checkbox class="pwd-checkbox" v-model="checked" label="记住密码" />
+                  <el-link type="primary" @click="$router.push('/reset-pwd')">忘记密码</el-link> -->
+        </div>
+        <el-button class="login-btn" type="primary" size="large" @click="submitForm(login)"
+          :loading="loading">登录</el-button>
+        <p class="login-tips">Tips : 用户名和密码随便填。</p>
+        <p class="login-text">
+          没有账号？<el-link type="primary" @click="$router.push('/register')">立即注册</el-link>
+        </p>
+      </el-form>
+    </div>
+  </div>
+  <div class="top-right-wrap">
+    <div class="btn theme-btn">
+      <i class="iconfont-sys">
+        &#xe725;
+      </i>
+    </div>
   </div>
 </template>
 
@@ -50,31 +53,32 @@ import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
+import { ElNotification } from 'element-plus';
 import useLoading from '@/hooks/loading'
-import {useUserStore} from '@/store'
+import { useUserStore } from '@/store'
 
 interface LoginInfo {
   username: string;
   password: string;
 }
 
-const {loading,setLoading}=useLoading()
+const { loading, setLoading } = useLoading()
 const router = useRouter();
-const userStore=useUserStore()
+const userStore = useUserStore()
 
 
 const params = reactive<LoginInfo>({
-  username:'admin',
-  password:'admin',
+  username: 'admin',
+  password: 'admin123',
 });
 const login = ref<FormInstance>()
 const rules: FormRules = {
   username: [
-      {
-          required: true,
-          message: '请输入用户名',
-          trigger: 'blur',
-      },
+    {
+      required: true,
+      message: '请输入用户名',
+      trigger: 'blur',
+    },
   ],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 };
@@ -82,27 +86,31 @@ const rules: FormRules = {
 // const login = ref<FormInstance>();
 const submitForm = async (formEl: FormInstance | undefined) => {
   // 防止重复点击
-  if(loading.value)return
+  if (loading.value) return
   if (!formEl) return;
-  await formEl.validate(async valid=>{
-    if(valid){
+  await formEl.validate(async valid => {
+    if (valid) {
       setLoading(true)
-      try{
+      try {
         await userStore.login(params)
-      }catch(err){
-        console.log('err',err)
-      }finally{
+        ElNotification.success({
+          title: '登录成功',
+          message: '登录成功',
+          type: 'success',
+        })
+        router.push('/')
+      } catch (err) {
+        console.log('err', err)
+      } finally {
         setLoading(false)
       }
     }
   })
 };
 
-// const tabs = useTabsStore();
-// tabs.clearTabs();
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .login-bg {
   display: flex;
   align-items: center;
@@ -166,5 +174,32 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   margin-top: 20px;
   font-size: 14px;
   color: #787878;
+}
+
+.top-right-wrap {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  .btn {
+    display: inline-block;
+    padding: 5px;
+    margin-left: 15px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s;
+
+    i {
+      font-size: 18px;
+    }
+
+    &:hover {
+      color: var(--main-color) !important;
+    }
+  }
 }
 </style>

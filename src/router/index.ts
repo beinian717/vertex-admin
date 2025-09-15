@@ -1,28 +1,10 @@
-import { createRouter ,createWebHashHistory} from "vue-router";
-import { appRoutes } from "./routes";
-import NProgress from 'nprogress'
-import 'nprogress/nprogress.css'
-// 进度条库  不同时显示旋转的加载指示器（圆圈动画）
-NProgress.configure({showSpinner:false})
+import {createRouter,createWebHashHistory} from 'vue-router'
+import routes from './basicRoute'
 
-console.log(appRoutes)
-const router =createRouter({
+const router=createRouter({
     history:createWebHashHistory(),
-    routes:[
-        {
-            path:'/',
-            redirect:'login'
-        },
-        {
-            path:'/login',
-            component:()=>import('@/views/login/index.vue')
-        },
-        {
-            path:'/dashboard',
-            component:()=>import('@/views/dashboard/index.vue')
-        },
-        // 页面级路由
-        ...appRoutes
-    ]
+    routes
 })
-export default router;
+
+
+export default router

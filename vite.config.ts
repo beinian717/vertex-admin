@@ -4,6 +4,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import {resolve} from 'path'
+import path from 'path'
 
 export default defineConfig({
   base:'./',
@@ -18,7 +19,8 @@ export default defineConfig({
   ],
   resolve:{
     alias:{
-      '@':resolve(__dirname,'./src')
+      '@':resolve(__dirname,'src'),
+      '@icons':path.resolve(__dirname,'src/assets/icons'),
     }
   },
   server:{

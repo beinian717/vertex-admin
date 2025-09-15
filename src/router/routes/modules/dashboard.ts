@@ -1,4 +1,4 @@
-import { DEFAULT_LAYOUT } from "../base";
+import { DEFAULT_LAYOUT } from "../../basicRoute";
 import { AppRouteRecordRaw } from "../types";
 
 const DASHBOARD={
